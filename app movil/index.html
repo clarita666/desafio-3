@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gestor de Nube - AWS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: Arial; margin: 0; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 15px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        h1 { text-align: center; color: #333; margin-bottom: 30px; }
+        .section { margin: 20px 0; padding: 15px; border: 2px solid #e9ecef; border-radius: 10px; }
+        .section h3 { margin-top: 0; color: #495057; }
+        button { width: 100%; padding: 12px; margin: 8px 0; background: #007bff; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; transition: all 0.3s; }
+        button:hover { background: #0056b3; transform: translateY(-2px); }
+        button.danger { background: #dc3545; }
+        button.danger:hover { background: #c82333; }
+        button.success { background: #28a745; }
+        button.success:hover { background: #218838; }
+        input, select { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; }
+        .result { margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #007bff; }
+        .loading { text-align: center; color: #666; }
+        .form-group { margin: 10px 0; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Gestor de Nube - AWS</h1>
+        
+        <div class="section">
+            <h3>Almacenamiento</h3>
+            <button onclick="listarBuckets()">Ver Todos los Contenedores</button>
+            
+            <div class="form-group">
+                <label>Crear Nuevo Contenedor:</label>
+                <input type="text" id="bucketName" placeholder="Nombre del contenedor">
+                <select id="bucketRegion">
+                    <option value="us-east-1">Región Pampa (Principal)</option>
+                    <option value="us-west-2">Región Patagonia (Oeste)</option>
+                    <option value="eu-west-1">Región Cuyo (Europa)</option>
+                    <option value="sa-east-1">Región Litoral (Sudamérica)</option>
+                </select>
+                <button class="success" onclick="crearBucket()">Crear Contenedor</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>Servidores Virtuales</h3>
+            <button onclick="listarInstancias()">Ver Todos los Servidores</button>
+            <button class="success" onclick="crearInstancia()">Crear Nuevo Servidor</button>
+        </div>
+
+        <div class="section">
+            <h3>Acciones Rapidas</h3>
+            <button onclick="estadoAWS()">Estado General del Sistema</button>
+            <button class="danger" onclick="limpiarResultados()">Limpiar Resultados</button>
+        </div>
+        
+        <div id="resultado" class="result" style="display:none;"></div>
+    </div>
+
+    <script>
+        // Datos simulados
+        let contenedores = ['mi-contenedor-1', 'backup-datos', 'imagenes-web'];
+        let servidores = [
+            {id: 'srv-001', name: 'Servidor Web', state: 'running'},
+            {id: 'srv-002', name: 'Base de Datos', state: 'stopped'},
+            {id: 'srv-003', name: 'API Server', state: 'running'}
+        ];
+
+        function listarBuckets() {
+            mostrarCargando();
+            setTimeout(() => {
+                mostrarResultado(`<strong>Contenedores:</strong><br>${contenedores.map(b => `• ${b}`).join('<br>')}`);
+            }, 1000);
+        }
+
+        function crearBucket() {
+            const nombre = document.getElementById('bucketName').value;
+            const region = document.getElementById('bucketRegion').value;
+            
+            if (!nombre) {
+                mostrarResultado('<strong>Error:</strong> Ingresa un nombre para el contenedor');
+                return;
+            }
+            
+            mostrarCargando();
+            setTimeout(() => {
+                contenedores.push(nombre);
+                mostrarResultado(`<strong>Contenedor creado:</strong> ${nombre} en ${region}`);
+                document.getElementById('bucketName').value = '';
+            }, 1500);
+        }
+
+        function listarInstancias() {
+            mostrarCargando();
+            setTimeout(() => {
+                const lista = servidores.map(i => 
+                    `<strong>${i.id}</strong> (${i.name})<br>Estado: <span style="color: ${i.state === 'running' ? 'green' : 'orange'}">${i.state}</span>`
+                ).join('<br><br>');
+                mostrarResultado(`<strong>Servidores Virtuales:</strong><br><br>${lista}`);
+            }, 1000);
+        }
+
+        function crearInstancia() {
+            mostrarCargando();
+            setTimeout(() => {
+                const nuevoId = 'srv-' + String(Math.floor(Math.random() * 1000)).padStart(3, '0');
+                servidores.push({id: nuevoId, name: 'Nuevo Servidor', state: 'running'});
+                mostrarResultado(`<strong>Servidor creado:</strong> ${nuevoId}`);
+            }, 2000);
+        }
+
+        function estadoAWS() {
+            mostrarCargando();
+            setTimeout(() => {
+                const running = servidores.filter(i => i.state === 'running').length;
+                let resumen = '<strong>Resumen de tu sistema:</strong><br><br>';
+                resumen += `Contenedores: ${contenedores.length}<br>`;
+                resumen += `Servidores: ${servidores.length}<br>`;
+                resumen += `Servidores activos: ${running}`;
+                mostrarResultado(resumen);
+            }, 800);
+        }
+
+        function mostrarCargando() {
+            const div = document.getElementById('resultado');
+            div.innerHTML = '<div class="loading">Cargando...</div>';
+            div.style.display = 'block';
+        }
+
+        function mostrarResultado(texto) {
+            const div = document.getElementById('resultado');
+            div.innerHTML = texto;
+            div.style.display = 'block';
+        }
+
+        function limpiarResultados() {
+            document.getElementById('resultado').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
